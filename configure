@@ -6961,8 +6961,8 @@ check_optflags -fno-signed-zeros
 
 if enabled lto; then
     test "$cc_type" != "$ld_type" && die "LTO requires same compiler and linker"
-    check_cflags  -flto
-    check_ldflags -flto $cpuflags
+    check_cflags  -flto=16
+    check_ldflags -flto=16 $cpuflags
     disable inline_asm_direct_symbol_refs
 fi
 
@@ -7607,6 +7607,18 @@ IGNORE_TESTS=$ignore_tests
 EOF
 
 map 'eval echo "${v}_FFLIBS=\$${v}_deps" >> ffbuild/config.mak' $LIBRARY_LIST
+
+do_static(){
+    libs_file=$1
+    python static.py --libfile=$1
+}
+
+for entry in $LIBRARY_LIST $PROGRAM_LIST $EXTRALIBS_LIST; do
+    eval echo "EXTRALIBS-${entry}=\$${entry}_extralibs" >> ffbuild/libs.mak
+done
+
+do_static ffbuild/libs.mak
+. ffbuild/libs_var.sh
 
 for entry in $LIBRARY_LIST $PROGRAM_LIST $EXTRALIBS_LIST; do
     eval echo "EXTRALIBS-${entry}=\$${entry}_extralibs" >> ffbuild/config.mak
