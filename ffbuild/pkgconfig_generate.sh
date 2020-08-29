@@ -14,6 +14,8 @@ fullname=${name}${build_suffix}
 comment=$2
 libs=$(eval echo \$extralibs_${shortname})
 deps=$(eval echo \$${shortname}_deps)
+libs_cuda="-Wl,-Bstatic /usr/cuda/lib64/libcublasLt_static.a /usr/cuda/lib64/libcublas_static.a /usr/cuda/lib64/libcudadevrt.a /usr/cuda/lib64/libcudart_static.a /usr/cuda/lib64/libcufft_static_nocallback.a /usr/cuda/lib64/libcufftw_static.a /usr/cuda/lib64/libculibos.a /usr/cuda/lib64/libcurand_static.a /usr/cuda/lib64/libcusolver_static.a /usr/cuda/lib64/libcusparse_static.a /usr/cuda/lib64/liblapack_static.a /usr/cuda/lib64/libmetis_static.a /usr/cuda/lib64/libnppc_static.a /usr/cuda/lib64/libnppial_static.a /usr/cuda/lib64/libnppicc_static.a /usr/cuda/lib64/libnppidei_static.a /usr/cuda/lib64/libnppif_static.a /usr/cuda/lib64/libnppig_static.a /usr/cuda/lib64/libnppim_static.a /usr/cuda/lib64/libnppist_static.a /usr/cuda/lib64/libnppisu_static.a /usr/cuda/lib64/libnppitc_static.a /usr/cuda/lib64/libnpps_static.a /usr/cuda/lib64/libnvjpeg_static.a"
+libs_nvidia="-Wl,-Bdynamic -L/usr/nvidia/lib -lGL -lEGL -lGLX -lnvcuvid"
 
 for dep in $deps; do
     depname=lib${dep}
@@ -38,8 +40,8 @@ Version: $version
 Requires: $($shared || echo $requires)
 Requires.private: $($shared && echo $requires)
 Conflicts:
-Libs: -L\${libdir} $rpath -l${fullname#lib} $($shared || echo $libs)
-Libs.private: $($shared && echo $libs)
+Libs: -L\${libdir} $($shared && echo -Wl,-Bdynamic -l${fullname#lib} || echo -Wl,-Bstatic /usr/lib64/${fullname}.a) $($shared || echo $libs_cuda $libs_nvidia $libs)
+Libs.private: $($shared && echo $libs_cuda $libs_nvidia $libs)
 Cflags: -I\${includedir}
 EOF
 
@@ -57,6 +59,6 @@ Description: $comment
 Version: $version
 Requires: $requires
 Conflicts:
-Libs: -L\${libdir} -Wl,-rpath,\${libdir} -l${fullname#lib} $($shared || echo $libs)
+Libs: -L\${libdir} $($shared && echo -Wl,-Bdynamic -l${fullname#lib} || echo -Wl,-Bstatic /usr/lib64/${fullname}.a) $($shared || echo $libs_cuda $libs_nvidia $libs)
 Cflags: -I\${includedir}
 EOF
