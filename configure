@@ -7559,18 +7559,6 @@ EOF
 
 map 'eval echo "${v}_FFLIBS=\$${v}_deps" >> ffbuild/config.mak' $LIBRARY_LIST
 
-do_static(){
-    libs_file=$1
-    python static.py --libfile=$1
-}
-
-for entry in $LIBRARY_LIST $PROGRAM_LIST $EXTRALIBS_LIST; do
-    eval echo "EXTRALIBS-${entry}=\$${entry}_extralibs" >> ffbuild/libs.mak
-done
-
-do_static ffbuild/libs.mak
-. ffbuild/libs_var.sh
-
 for entry in $LIBRARY_LIST $PROGRAM_LIST $EXTRALIBS_LIST; do
     eval echo "EXTRALIBS-${entry}=\$${entry}_extralibs" >> ffbuild/config.mak
 done
